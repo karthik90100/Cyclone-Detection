@@ -2,12 +2,16 @@ import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "@studio-freight/lenis";
-
+import { useLocation } from "react-router-dom";
 gsap.registerPlugin(ScrollTrigger);
 
 const Home = () => {
     const canvasRef = useRef(null);
     const containerRef = useRef(null);
+    const arrowRef = useRef(null);
+    const location = useLocation();
+
+    if (location.pathname !== "/") return null;
 
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const [loadingProgress, setLoadingProgress] = useState(0);
@@ -16,6 +20,19 @@ const Home = () => {
     const playheadRef = useRef({ frame: 0 });
 
     const frameCount = 240;
+    useEffect(() => {
+        if (!arrowRef.current) return;
+
+        gsap.to(arrowRef.current.querySelectorAll(".arrow"), {
+            y: 10,
+            opacity: 0.3,
+            stagger: 0.2,
+            repeat: -1,
+            yoyo: true,
+            ease: "power1.inOut",
+            duration: 0.8,
+        });
+    }, []);
 
     // 🚀 LENIS SMOOTH SCROLL
     useEffect(() => {
@@ -36,6 +53,7 @@ const Home = () => {
 
         return () => {
             lenis.destroy();
+            ScrollTrigger.killAll();   // 🔥 ADD THIS LINE
         };
     }, []);
 
@@ -146,9 +164,9 @@ const Home = () => {
             scrollTrigger: {
                 trigger: containerRef.current,
                 start: "top top",
-                end: () => "+=" + window.innerHeight * 4, // 🔥 PERFECT
+                end: () => "+=" + window.innerHeight * 8, // 🔥 PERFECT
                 pin: true,
-                scrub: 1.2,
+                scrub: 6,
                 anticipatePin: 1,
             },
         });
@@ -181,8 +199,13 @@ const Home = () => {
 
         return () => {
             cancelAnimationFrame(rafId);
-            tl.kill();
+
+            if (tl) tl.kill();
+
             ScrollTrigger.getAll().forEach((t) => t.kill());
+
+            // 🔥 VERY IMPORTANT
+            gsap.killTweensOf(playhead);
         };
     }, [imagesLoaded]);
 
@@ -193,6 +216,7 @@ const Home = () => {
                 height: "100vh",
                 position: "relative",
                 background: "black",
+                overflow: "hidden",
             }}
         >
             {!imagesLoaded && (
@@ -204,12 +228,21 @@ const Home = () => {
             <canvas
                 ref={canvasRef}
                 style={{
-                    position: "sticky",
+                    position: "fixed",
                     top: 0,
                     width: "100%",
                     height: "100vh",
+                    zIndex: -1,
                 }}
             />
+            <div className="scroll-indicator" ref={arrowRef}>
+                <span>Scroll Down</span>
+                <div className="arrows">
+                    <div className="arrow"></div>
+                    <div className="arrow"></div>
+                    <div className="arrow"></div>
+                </div>
+            </div>
         </div>
     );
 };

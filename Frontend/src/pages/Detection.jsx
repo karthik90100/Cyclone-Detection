@@ -16,6 +16,7 @@ function Detection() {
     const navigate = useNavigate();
 
     const handleFile = (file) => {
+        if (!file) return;
         setFile(file);
         setPreview(URL.createObjectURL(file));
     };
@@ -47,96 +48,89 @@ function Detection() {
         setRisk(res.data.risk);
 
         setLoading(false);
-
-        navigate("/dashboard"); // 🔥 redirect
+        navigate("/dashboard");
     };
 
     return (
-        <div className="p-10 grid md:grid-cols-2 gap-8">
+        <>
+         <h1 className="text-5xl text-white">DETECTION</h1>
+        <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center p-6">
+           
+            {/* CARD */}
+            <div className="w-full max-w-5xl bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl shadow-xl p-8 grid md:grid-cols-2 gap-8">
 
-            {/* LEFT */}
-            <div>
-                <div
-                    className="border-2 border-dashed border-gray-400 p-10 text-center rounded-lg cursor-pointer hover:bg-gray-100 transition"
-                    onClick={() => document.getElementById("fileInput").click()}
+                {/* LEFT SIDE */}
+                <div>
+                    <div
+                        className="border-2 border-dashed border-gray-500 p-10 text-center rounded-xl cursor-pointer hover:bg-white/10 transition"
+                        onClick={() => document.getElementById("fileInput").click()}
+                        onDrop={(e) => {
+                            e.preventDefault();
+                            handleFile(e.dataTransfer.files[0]);
+                        }}
+                        onDragOver={(e) => e.preventDefault()}
+                    >
+                        <p className="text-white text-lg font-semibold">
+                            📂 Drag & Drop Image
+                        </p>
+                        <p className="text-gray-400 mt-2">
+                            or Click to Upload (JPG, PNG)
+                        </p>
 
-                    onDrop={(e) => {
-                        e.preventDefault();
-                        const file = e.dataTransfer.files[0];
-                        handleFile(file);
-                    }}
+                        <input
+                            id="fileInput"
+                            type="file"
+                            className="hidden"
+                            onChange={(e) => handleFile(e.target.files[0])}
+                        />
+                    </div>
 
-                    onDragOver={(e) => e.preventDefault()}
-                >
-                    <p className="text-gray-600 text-lg font-semibold">
-                        📂 Drag & Drop Image Here
-                    </p>
-
-                    <p className="text-gray-400 mt-2">
-                        or Click to Upload (JPG, PNG)
-                    </p>
-
-                    {/* Hidden Input */}
-                    <input
-                        id="fileInput"
-                        type="file"
-                        className="hidden"
-                        onChange={(e) => handleFile(e.target.files[0])}
-                    />
+                    {/* PREVIEW */}
+                    {preview && (
+                        <img
+                            src={preview}
+                            alt="preview"
+                            className="mt-4 rounded-xl shadow-lg w-full max-h-80 object-cover border border-white/10"
+                        />
+                    )}
                 </div>
 
-                {/* Preview */}
-                {preview && (
-                    <img
-                        src={preview}
-                        alt="preview"
-                        className="mt-4 rounded-lg shadow-lg w-full max-h-80 object-cover"
-                    />
-                )}
-            </div>
+                {/* RIGHT SIDE */}
+                <div className="flex flex-col justify-center space-y-6">
 
-            {/* RIGHT */}
-            <div className="space-y-4">
-                <button onClick={getLocation} className="btn">📍 Get Location</button>
+                    {/* LOCATION BUTTON */}
+                    <button
+                        onClick={getLocation}
+                        className="w-full py-3 rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition"
+                    >
+                        Get Location
+                    </button>
 
-                {location && (
-                    <p>Lat: {location.lat.toFixed(2)} | Lon: {location.lon.toFixed(2)}</p>
-                )}
+                    {/* LOCATION DISPLAY */}
+                    {location && (
+                        <div className="text-green-400 text-sm text-center">
+                            Lat: {location.lat.toFixed(2)} | Lon: {location.lon.toFixed(2)}
+                        </div>
+                    )}
 
-                <button onClick={handleUpload} className="btn bg-blue-500 text-white">
-                    🚀 Predict
-                </button>
+                    {/* PREDICT BUTTON */}
+                    <button
+                        onClick={handleUpload}
+                        className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold transition"
+                    >
+                        Predict Cyclone
+                    </button>
 
-                {loading && <p>Loading...</p>}
-            </div>
-            {/* LEFT */}
-            <div>
-                <div
-                    className="border-2 border-dashed border-gray-400 p-8 text-center rounded-lg cursor-pointer hover:bg-gray-100"
-                    onClick={() => document.getElementById("fileInput").click()}
-                >
-                    <p className="text-gray-600 text-lg">📂 Click to Upload Image</p>
-                    <p className="text-sm text-gray-400 mt-2">JPG, PNG supported</p>
-
-                    {/* Hidden Input */}
-                    <input
-                        id="fileInput"
-                        type="file"
-                        className="hidden"
-                        onChange={(e) => handleFile(e.target.files[0])}
-                    />
+                    {/* LOADING */}
+                    {loading && (
+                        <p className="text-center text-yellow-400 animate-pulse">
+                            Processing...
+                        </p>
+                    )}
                 </div>
-
-                {/* Preview */}
-                {preview && (
-                    <img
-                        src={preview}
-                        alt="preview"
-                        className="mt-4 rounded-lg shadow-lg w-full max-h-80 object-cover"
-                    />
-                )}
             </div>
         </div>
+        </>
     );
 }
 

@@ -31,3 +31,48 @@ html, body {
   padding: 0;
   overflow-x: hidden;
 }
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+
+  font-size: 18px;          /* 🔥 bigger */
+  font-weight: 700;         /* 🔥 bold */
+  letter-spacing: 3px;
+
+  text-align: center;
+
+  /* 🔥 GLOW EFFECT (VERY IMPORTANT) */
+  text-shadow: 
+    0 0 5px rgba(255,255,255,0.8),
+    0 0 10px rgba(255,255,255,0.6),
+    0 0 20px rgba(255,255,255,0.4);
+
+  z-index: 10;              /* 🔥 make sure it's above canvas */
+}
+
+.arrows {
+  margin-top: 10px;
+}
+.arrow {
+  width: 14px;
+  height: 14px;
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: rotate(45deg);
+  margin: 6px auto;
+  opacity: 1;
+
+  /* glow */
+  filter: drop-shadow(0 0 6px white);
+}
+
+.scroll-indicator {
+  padding: 8px 30px ;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+}

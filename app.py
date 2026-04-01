@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import numpy as np
 from PIL import Image
 from flask_cors import CORS
+import requests
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Input, Conv2D, MaxPooling2D, Flatten, Dense
@@ -9,7 +10,10 @@ from tensorflow.keras.layers import Input, Conv2D, MaxPooling2D, Flatten, Dense
 app = Flask(__name__)
 CORS(app)
 
-# ✅ Rebuild model
+# ==============================
+# 🔥 MODEL SETUP
+# ==============================
+
 model = Sequential([
     Input(shape=(224, 224, 3)),
 
@@ -32,73 +36,143 @@ model.load_weights("cloud.weights.h5")
 classes = ['VEIL CLOUDS', 'clear', 'pattern', 'thick dark', 'thick white']
 
 
-# 🔥 FUNCTION: Detect if image looks like sky/cloud
+# ==============================
+# ☁️ IMAGE VALIDATION
+# ==============================
+
 def is_cloud_image(img):
     img_np = np.array(img)
 
-    # Average brightness
     brightness = np.mean(img_np)
 
-    # Blue channel dominance
     blue_mean = np.mean(img_np[:, :, 2])
     red_mean = np.mean(img_np[:, :, 0])
-    green_mean = np.mean(img_np[:, :, 1])
 
-    # 🔥 RULES (tuned)
     if brightness < 70:
-        return False  # too dark (indoor / night)
+        return False
 
-    if blue_mean < red_mean:  
-        return False  # not sky dominant
+    if blue_mean < red_mean:
+        return False
 
     return True
 
 
+# ==============================
+# 🌦️ WEATHER API FUNCTION
+# ==============================
+
+def get_weather(lat, lon):
+    API_KEY = "5233375f708b67ed604cd291a09f8ef2"  # 🔥 PUT YOUR KEY HERE
+
+    url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
+
+    res = requests.get(url)
+
+    if res.status_code != 200:
+        return None
+
+    data = res.json()
+
+    return {
+        "windSpeed": data["wind"]["speed"],   # m/s
+        "pressure": data["main"]["pressure"], # hPa
+        "humidity": data["main"]["humidity"],
+        "condition": data["weather"][0]["main"]
+    }
+
+
+# ==============================
+# 🏠 HOME ROUTE
+# ==============================
+
 @app.route("/", methods=["GET"])
 def home():
-    return "Cloud Detection API Running"
+    return "🚀 Cloud + Cyclone Detection API Running"
 
+
+# ==============================
+# 🔮 PREDICTION ROUTE
+# ==============================
 
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
+        # 📂 Get file
+        if "file" not in request.files:
+            return jsonify({"error": "No file uploaded"})
+
         file = request.files["file"]
 
-        # Load image
+        # 📍 Get location
+        lat = request.form.get("lat")
+        lon = request.form.get("lon")
+
+        if not lat or not lon:
+            return jsonify({"error": "Location not provided"})
+
+        lat = float(lat)
+        lon = float(lon)
+
+        # 🖼️ Load image
         img = Image.open(file).convert("RGB")
         img = img.resize((224, 224))
 
-        # 🚨 STEP 1: Check if cloud-like image
+        # 🚨 Validate image
         if not is_cloud_image(img):
             return jsonify({
                 "prediction": "Invalid Image ❌",
                 "confidence": 0
             })
 
-        # 🚀 STEP 2: Preprocess
+        # 🔄 Preprocess
         img_array = np.array(img) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
 
-        # 🚀 STEP 3: Predict
+        # 🤖 Predict
         prediction = model.predict(img_array)[0]
         index = int(np.argmax(prediction))
         confidence = float(prediction[index]) * 100
 
-        print("Prediction vector:", prediction)
-        print("Predicted class:", classes[index])
-
         result = classes[index]
 
+        # 🌦️ Get weather data
+        weather = get_weather(lat, lon)
+
+        if weather is None:
+            return jsonify({
+                "prediction": result,
+                "confidence": round(confidence, 2),
+                "error": "Weather API failed"
+            })
+
+        # 🌪️ Cyclone risk logic
+        risk = "🟢 Safe"
+
+        if (
+            result.lower() in ["thick dark", "thick white"] and
+            weather["windSpeed"] > 15 and
+            weather["pressure"] < 1000
+        ):
+            risk = "🔴 Cyclone Risk"
+
+        elif weather["windSpeed"] > 10:
+            risk = "🟡 Storm Possible"
+
+        # 📤 Response
         return jsonify({
             "prediction": result,
-            "confidence": round(confidence, 2)
+            "confidence": round(confidence, 2),
+            "weather": weather,
+            "risk": risk
         })
 
     except Exception as e:
-        return jsonify({
-            "error": str(e)
-        })
+        return jsonify({"error": str(e)})
 
+
+# ==============================
+# 🚀 RUN SERVER
+# ==============================
 
 if __name__ == "__main__":
     app.run(debug=True)

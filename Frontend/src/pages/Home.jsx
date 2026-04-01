@@ -29,7 +29,7 @@ const Home = () => {
             stagger: 0.2,
             repeat: -1,
             yoyo: true,
-            ease: "power1.inOut",
+            ease: "none",
             duration: 0.8,
         });
     }, []);
@@ -39,7 +39,8 @@ const Home = () => {
         const lenis = new Lenis({
             duration: 1.2,
             smooth: true,
-            lerp: 0.1,
+            lerp: 0.03,
+            wheelMultiplier: 0.9,
         });
 
         function raf(time) {
@@ -66,6 +67,7 @@ const Home = () => {
             const frameNum = String(index - 120 + 1).padStart(3, "0");
             return `/frames/seq2/frame_${frameNum}.webp`;
         }
+
     };
 
     // 🎬 RENDER FRAME
@@ -111,6 +113,7 @@ const Home = () => {
         for (let i = 0; i < frameCount; i++) {
             const img = new Image();
             img.src = getFrameUrl(i);
+            img.decoding = "async"; // 🔥 add this
             imagesRef.current.push(img);
 
             img.onload = () => {
@@ -164,9 +167,9 @@ const Home = () => {
             scrollTrigger: {
                 trigger: containerRef.current,
                 start: "top top",
-                end: () => "+=" + window.innerHeight * 8, // 🔥 PERFECT
+                end: () => "+=" + window.innerHeight * 2, // 🔥 PERFECT
                 pin: true,
-                scrub: 6,
+                scrub: 0.2,
                 anticipatePin: 1,
             },
         });
@@ -181,7 +184,7 @@ const Home = () => {
 
         const renderLoop = () => {
             const frameIndex = Math.min(
-                Math.floor(playhead.frame),
+                Math.round(playhead.frame),
                 imagesRef.current.length - 1
             );
 
@@ -233,6 +236,7 @@ const Home = () => {
                     width: "100%",
                     height: "100vh",
                     zIndex: -1,
+                    willChange: "transform", // 🔥 ADD THIS
                 }}
             />
             <div className="scroll-indicator" ref={arrowRef}>

@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 from flask_cors import CORS
 import requests
-
+import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Input, Conv2D, MaxPooling2D, Flatten, Dense
 
@@ -13,6 +13,11 @@ CORS(app)
 # ==============================
 # 🔥 MODEL SETUP
 # ==============================
+# ==============================
+# 🛰️ SATELLITE MODEL
+# ==============================
+
+satellite_model = tf.keras.models.load_model("cyclone_detection_model.keras")
 
 model = Sequential([
     Input(shape=(224, 224, 3)),
@@ -88,7 +93,43 @@ def get_weather(lat, lon):
 @app.route("/", methods=["GET"])
 def home():
     return "🚀 Cloud + Cyclone Detection API Running"
+# ==============================
+# 🛰️ SATELLITE PREDICTION ROUTE
+# ==============================
 
+@app.route("/predict-satellite", methods=["POST"])
+def predict_satellite():
+    try:
+        if "file" not in request.files:
+            return jsonify({"error": "No file uploaded"})
+
+        file = request.files["file"]
+
+        # 🖼️ Load image
+        img = Image.open(file).convert("RGB")
+        img = img.resize((150, 150))  # must match training
+
+        # 🔄 Preprocess
+        img_array = np.array(img, dtype=np.float32) / 255.0
+        img_array = np.expand_dims(img_array, axis=0)
+
+        # 🤖 Predict
+        prediction = float(satellite_model.predict(img_array, verbose=0)[0][0])
+
+        if prediction >= 0.5:
+            result = "No Cyclone"
+            confidence = prediction
+        else:
+            result = "Cyclone"
+            confidence = 1 - prediction
+
+        return jsonify({
+            "prediction": result,
+            "confidence": round(confidence * 100, 2)
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
 # ==============================
 # 🔮 PREDICTION ROUTE

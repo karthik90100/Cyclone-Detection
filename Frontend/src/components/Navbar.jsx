@@ -28,12 +28,22 @@ function Navbar() {
                     Home
                 </Link>
 
+                {/* 🌾 Ground Detection */}
                 <Link
-                    to="/detect"
-                    className={`hover:text-blue-400 transition ${location.pathname === "/detect" && "text-blue-400"
+                    to="/detect-ground"
+                    className={`hover:text-blue-400 transition ${location.pathname === "/ground" && "text-blue-400"
                         }`}
                 >
-                    Detection
+                    Ground Detection
+                </Link>
+
+                {/* 🛰️ Satellite Detection */}
+                <Link
+                    to="/detect-satilite"
+                    className={`hover:text-blue-400 transition ${location.pathname === "/satellite" && "text-blue-400"
+                        }`}
+                >
+                    Satellite Detection
                 </Link>
 
                 <Link

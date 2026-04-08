@@ -40,7 +40,7 @@ function WeatherCards({ weather }) {
     const pressureTrend = pressure > 1010 ? "up" : "down";
 
     return (
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-8 mt-10">
 
             {/* 🌬️ WIND CARD */}
             <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-500/10 to-cyan-400/5 border border-white/10 hover:scale-105 transition duration-300">

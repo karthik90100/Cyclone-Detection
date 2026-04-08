@@ -23,7 +23,7 @@ function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white px-6 py-10 pt-20">
+        <div className="min-h-screen bg-linear-to-br from-black via-gray-900 to-black text-white px-6 py-10 pt-20">
 
             {/* HEADER */}
             <h1 className="text-4xl md:text-5xl font-bold text-center mb-10">
@@ -38,16 +38,26 @@ function Dashboard() {
                     <h2 className="text-gray-400 mb-3">Prediction</h2>
 
                     <div className="text-4xl font-bold flex gap-3">
-                        {result === "Invalid Image" ? "❌" : "☁️"}
-                        <span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
-                            {result}
+                        <span className="bg-linear-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+                            🌧️ Chance of Rain:
                         </span>
+                        <span className="ml-2 text-cyan-400 font-bold">
+                            {confidence}%
+                        </span>
+
                     </div>
 
                     <p className="mt-4">
                         Confidence:
                         <span className="ml-2 text-blue-400 font-bold">
                             {confidence}%
+                        </span>
+                    </p>
+
+                    <p className="mt-2">
+                        {result === "Invalid Image" ? "❌" : "☁️"}
+                        <span className="ml-2 text-cyan-400 font-bold">
+                            {result}
                         </span>
                     </p>
 
@@ -62,7 +72,7 @@ function Dashboard() {
 
                 {/* Risk */}
                 <div className={`bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl flex flex-col items-center justify-center ${getRiskGlow()}`}>
-                    <h2 className="text-gray-400 mb-3">Risk Level</h2>
+                    <h2 className="text-gray-400 mb-3">Cyclone Risk Level</h2>
 
                     <div className="flex items-center gap-3">
                         <span className="animate-ping h-3 w-3 rounded-full bg-green-400"></span>
@@ -78,7 +88,7 @@ function Dashboard() {
                 <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6">
                     <h2 className="text-gray-400 mb-4">🌍 Cyclone Map</h2>
 
-                    <div className="h-[300px] w-full rounded-xl overflow-hidden">
+                    <div className="h-75 w-full rounded-xl overflow-hidden">
                         <CycloneMap />
                     </div>
                 </div>
@@ -89,7 +99,7 @@ function Dashboard() {
                 <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6">
                     <h2 className="text-gray-400 mb-4">📈 Weather Trends</h2>
 
-                    <div className="h-[300px] w-full">
+                    <div className="h-75 w-full">
                         <WeatherChart />
                     </div>
                 </div>

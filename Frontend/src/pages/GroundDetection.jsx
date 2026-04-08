@@ -54,7 +54,7 @@ function Detection() {
     return (
         <>
             <h1 className="text-5xl text-white">DETECTION</h1>
-            <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center p-6">
+            <div className="min-h-screen bg-linear-to-br from-black via-gray-900 to-black flex items-center justify-center p-6">
 
                 {/* CARD */}
                 <div className="w-full max-w-5xl bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl shadow-xl p-8 grid md:grid-cols-2 gap-8">

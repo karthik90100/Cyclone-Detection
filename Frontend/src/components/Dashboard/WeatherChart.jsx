@@ -19,7 +19,7 @@ function WeatherChart() {
     ];
 
     return (
-        <div style={{ width: "100%", height: "300px", background: "#111" }}>
+        <div style={{ width: "100%", height: "300px", background: "#111" }} >
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data}>
                     <CartesianGrid stroke="#333" />
